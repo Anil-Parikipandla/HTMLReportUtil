@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<HTML>
+<HEAD>
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+<TITLE>MBG - Automation Test Execution Report</TITLE>
+</HEAD>
+
+
+<style type='text/css'>
+	input.button{
+	font-size: .8em; font-weight:bold; font-family: Verdana, Arial, Helvetica, sans-serif;
+	border: solid 1;
+	}
+	table.summary, th, td {
+		border: 1px solid black;
+		//width: 100%;
+	}
+	table.image,th.image,td.image{border: 0px}
+	tr{font-family:VERDANA; font-size:13px}
+
+	table{border-collapse: collapse; border: 2px solid #777;}
+	th{border: 1px solid #888;padding-top: 5px;
+    padding-bottom: 5px;}
+	td{border: 1px solid #888; padding-top: 5px;
+    padding-bottom: 5px;}
+	tr:nth-child(even){background-color: #e0e0e0}
+
+
+	tr.header{background-color:#39C2D7; color:white}
+	tr.subheader{background-color:#1A9CB0; color:black}
+	td.subheader{background-color:#1A9CB0; color:black; font-weight:bold}
+	//tr.header{background-color:#afafff; color:black}
+	//tr.subheader{background-color:#cfcfff; color:black}
+	//td.subheader{background-color:#cfcfff; color:black}
+
+</style>
+<!--cfcfff
+f8f8ff
+BGCOLOR='#fbfbff'
+color:#DF7401
+color:#B45F04
+body{background: linear-gradient(to right, rgba(0,0,255,0), rgba(240,240,255,1));}
+<BODY BGCOLOR=#F4F6Ff >-->
+<BODY BGCOLOR=#FDFDFD>
+	<script src="Magic.js"></script>
+<TABLE CLASS=image WIDTH=100%>
+<TR CLASS=image><TD CLASS=image><img src=.\logos\Header.png></TD>
+	<TD CLASS=image align=RIGHT>
+	<label for="xmlFileinput">Choose a valid report XML file:</label>
+	<input type="file" id="xmlFileinput" onchange= "handleFiles(this.files)" size=80> </TD>
+</TR>
+</TABLE>
+<h2 align=center><FONT FACE=Calibri COLOR=#1A9CB0>MBG - Automation Test Execution Report</Font></h2>
+
+<TABLE WIDTH=100%  >
+<!--#dbdbe 0
+eeeef f
+cfcff f
+dedef f
+-->
+	<TR CLASS=header>
+		<!--<TH COLSPAN=100% ALIGN=CENTER><FONT FACE=VERDANA SIZE=2><B ID='testsum'>PROJECT EXECUTION SUMMARY</FONT></B></TH>-->
+		<TH ID='testsum' COLSPAN=100% ALIGN=CENTER>PROJECT EXECUTION SUMMARY</TH>
+	</TR>
+	<TR ALIGN=CENTER CLASS=subheader>
+
+		<TD WIDTH=15%><B>Application Name</B></TD>
+		<TD WIDTH=15%><B>Application Type</B></TD>
+		<TD WIDTH=15%><B>Test Environment</B></TD>
+		<TD WIDTH=15%><B>Test Suite Type</B></TD>
+		<TD WIDTH=15%><B>Execution Start Time</B></TD>
+		<TD WIDTH=15%><B>Execution End Time</B></TD>
+	</TR>
+	<TR ALIGN=CENTER>
+		<TD WIDTH=15%> <A id='appName' HREF='#' onclick='generateModuleList()'></A> </TD>
+		<TD id='appType' WIDTH=15%> </TD>
+		<TD id='testEnv' WIDTH=15%> </TD>
+		<TD id='testType' WIDTH=15%> </TD>
+		<TD id='execDate' WIDTH=15%> </TD>
+		<TD id='execTime' WIDTH=15%> </TD>
+	</TR>
+</TABLE>
+</BR>
+
+<DIV ID='moduleList' style='display:none'>
+</DIV>
+
+<DIV ID='moduleSum' style='display:none'>
+<TABLE WIDTH=100% border=1px>
+	<TR CLASS=header>
+		<TH COLSPAN=100% ALIGN=CENTER><B id='modSumHeader'>MODULE EXECUTION SUMMARY - Module-1 </B></TH>
+	</TR>
+	<TR>
+		<TD CLASS=subheader WIDTH=13%>Build ID:</TD>
+		<TD id='buildID' WIDTH=12%></TD>
+		<TD CLASS=subheader WIDTH=13%>OS:</TD>
+		<TD id='os' WIDTH=12%></TD>
+		<TD CLASS=subheader WIDTH=13%>Host Name:</TD>
+		<TD id='machineName' WIDTH=12%></TD>
+		<TD CLASS=subheader WIDTH=13%>Browser:</TD>
+		<TD id='browser'WIDTH=12%></TD>
+	</TR>
+	<TR>
+		<TD CLASS=subheader WIDTH=13%>Executed by:</TD>
+		<TD id='execBy'WIDTH=12%></TD>
+		<TD CLASS=subheader WIDTH=13%>Automation Tool:</TD>
+		<TD id='autTool'WIDTH=12%></TD>
+		<TD CLASS=subheader WIDTH=13%>Execution Start time:</TD>
+		<TD id='modExecStartTime' WIDTH=12%></TD>
+		<TD CLASS=subheader WIDTH=13%>Execution End time:</TD>
+		<TD id='modExecEndTime' WIDTH=12%></TD>
+	</TR>
+	<TR>
+		<TD CLASS=subheader WIDTH=13%>Total Scenarios:</TD>
+		<TD WIDTH=12%><FONT id='totalScen' FACE=VERDANA  SIZE=2></TD>
+		<TD CLASS=subheader WIDTH=13%>Passed Scenarios:</TD>
+		<TD WIDTH=12%><FONT id='passedScen' FACE=VERDANA COLOR=Green SIZE=2></TD>
+		<TD CLASS=subheader WIDTH=13%>Failed Scenarios:</TD>
+		<TD WIDTH=12%><FONT id='failedScen' FACE=VERDANA COLOR=Red SIZE=2></TD>
+		<TD CLASS=subheader WIDTH=13%>Incomplete Scenarios:</TD>
+		<TD WIDTH=12%><FONT id='IncompleteScen' FACE=VERDANA  SIZE=2></TD>
+	</TR>
+</TABLE>
+</BR>
+<TABLE ID='scenList' WIDTH=100% border=1px>
+</TABLE>
+</DIV>
+
+<DIV ID='scenSum' style='display:none'>
+<TABLE WIDTH=100% border=1px>
+	<TR CLASS=header>
+		<TH COLSPAN=100% ALIGN=CENTER><B id='scenSumHeader'></B></TH>
+	</TR>
+	<TR>
+		<TD CLASS=subheader WIDTH=10%>Scenario ID:</TD>
+		<TD id='scenID' WIDTH=15%></TD>
+		<TD CLASS=subheader WIDTH=13%>Scenario Description:</TD>
+		<TD id='scenDesc' WIDTH=42% colspan=5></TD>
+	</TR>
+	<TR>
+		<TD CLASS=subheader WIDTH=10%>Module Name:</TD>
+		<TD id='scenModName' WIDTH=15%></TD>
+		<TD CLASS=subheader WIDTH=13%>Browser:</TD>
+		<TD id='scenBrowser'WIDTH=12%></TD>
+		<TD CLASS=subheader WIDTH=13%>Execution Start time:</TD>
+		<TD id='scenExecStartTime' WIDTH=12%></TD>
+		<TD CLASS=subheader WIDTH=13%>Execution End time:</TD>
+		<TD id='scenExecEndTime' WIDTH=12%></TD>
+	</TR>
+</TABLE>
+</BR>
+<TABLE ID='stepList' WIDTH=100% border=1px>
+</TABLE>
+</DIV>
+  <Table CLASS=image width=100%>
+	<TR width=100% ><TD width=20% CLASS=image align=RIGHT valign=bottom></TD><TD CLASS=image align=RIGHT><p></p></TD><TD CLASS=image align=RIGHT><img src=.\logos\Footer.jpg></TD></TR>
+  </Table>
+</BODY>
+</HTML>
