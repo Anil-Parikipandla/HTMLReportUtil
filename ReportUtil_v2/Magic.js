@@ -252,6 +252,40 @@ function generateModuleSummary(moduleNode) {
     document.getElementById("IncompleteScen").innerHTML = ScenarioUnexecutedCount;
 }
 
+function convertTwelveToTewntyFour(InputTime){
+  var StartDateObjects = InputTime.split(" ");
+  var date = StartDateObjects[0];
+  var time = StartDateObjects[1];
+  var timeObjects = time.split(":");
+  var hoursInInteger = parseInt(timeObjects[0]);
+  if((StartDateObjects[2] === "AM") && (hoursInInteger === 12)){
+    hoursInInteger = 00;
+  } else if((StartDateObjects[2] === "PM") && (hoursInInteger === 12 )){
+    hoursInInteger = 01;
+  } else if ((StartDateObjects[2] === "PM") && (hoursInInteger < 12 )){
+    hoursInInteger = hoursInInteger+12;
+  }
+  var dateObjects = date.split('/');
+  //DateTime Format is mm,dd,yyyy,hh,mm,ss
+  var TwentyFourTime = [parseInt(dateObjects[0]),parseInt(dateObjects[1]),parseInt(dateObjects[2]),hoursInInteger,parseInt(timeObjects[1]), parseInt(timeObjects[2])];
+  console.log('24:'+TwentyFourTime);
+  return TwentyFourTime;
+}
+
+function getTimeDifference(InputStartTime, InputEndTime){
+  var d1 = convertTwelveToTewntyFour(InputStartTime);
+  var d2 = convertTwelveToTewntyFour(InputEndTime);
+  //
+  var StartDate = new Date(d1[2],d1[0],d1[1],d1[3],d1[4],d1[5]);
+  var EndDate = new Date(d2[2],d2[0],d2[1],d2[3],d2[4],d2[5]);
+  var diffInMillis = StartDate.getTime() - EndDate.getTime();
+  var diffInHours = Math.floor(diffInMillis/1000/60/60);
+  var diffInMinutes = ('0' + Math.floor((diffInMillis/1000/60)%60) ).substr(-2);
+  var diffInSeconds = ('0' + Math.floor((diffInMillis/1000)%60) ).substr(-2);
+  var DateDifference = diffInHours+"hr "+diffInMinutes+"min "+diffInSeconds+"sec";
+  //console.log('Time Difference is: '+diffInHours+":"+diffInMinutes+":"+diffInSeconds);
+  return DateDifference;
+}
 
 function generateScenariosList(moduleNode) {
     strScenList = "";
@@ -266,6 +300,35 @@ function generateScenariosList(moduleNode) {
     for (i = 0; i < allScenarios.length; i++) {
         strScenId = allScenarios[i].getAttribute("TCID");
         strScenIteration = "ITERATION " + allScenarios[i].getElementsByTagName('Iteration')[0].childNodes[0].nodeValue;
+        var ScenarioDuration;
+        var ele = allScenarios[i].getElementsByTagName('ActualResult');
+        var eleArr = (ele[0].childNodes[0].nodeValue).split("-");
+        InputStartTime = eleArr[1];
+      //   var InputStartTime = (ele[0].childNodes[0].nodeValue).substring(12);
+      //  console.log('##:'+InputStartTime);
+
+        var InputEndTime;
+        if(i === allScenarios.length-1){
+          var modName = moduleNode.getAttribute('Name');
+        var  elem = findByAttributeValueInModules(pubXMLDoc, 'name', modName);
+        var endTimeObj = findByAttributeValue(elem, 'result', 'COMPLETED');
+        var EndTimeObjValue = endTimeObj.getElementsByTagName('ConsoleOutput')[0].childNodes[0].nodeValue;
+        var TimeStart =  EndTimeObjValue.search("End Time:");
+        var TimeEnd = EndTimeObjValue.search("Total Time:")
+        // console.log("Difference of the TimeStart and End:"+TimeStart-TimeEnd);
+        InputEndTime = EndTimeObjValue.substring(TimeStart+10,TimeEnd-1);
+      //  console.log("@@: "+InputEndTime);
+        } else {
+          var eleEnd = allScenarios[i+1].getElementsByTagName('ActualResult');
+          var eleEndArr = (eleEnd[0].childNodes[0].nodeValue).split("-");
+          InputEndTime = eleEndArr[1];
+      //    console.log("@#: "+InputEndTime);
+        }
+
+        ScenarioDuration = getTimeDifference(InputStartTime, InputEndTime);
+        console.log(ScenarioDuration + strScenIteration);
+
+
         //strScenDesc=allScenarios[i].getElementsByTagName('ConsoleOutput')[0].childNodes[0].nodeValue;
         function getPolicyFormNumber(sampledoc, attribute, value) {
             var allitems = sampledoc.getElementsByTagName('ReportItem');
@@ -295,6 +358,7 @@ function generateScenariosList(moduleNode) {
         //strScenList+="<TD>"+strScenIteration+"</TD><TD>" + strScenDuration + "</TD><TD BGCOLOR="+strBgColor+">" + strScenStatus + "</TD></TR>";
         strScenList += "<TD>" + strScenIteration + "</TD><TD>" + strPolicyNumber + "</TD><TD>" + strScenDuration + "</TD><TD BGCOLOR=" + strBgColor + ">" + strScenStatus + "</TD></TR>";
     }
+
     document.getElementById("scenList").innerHTML = strScenList;
     toggleMe("moduleSum");
 }
@@ -370,7 +434,7 @@ function getIteration(modName) {
 
 }
 
-function getScenarioStartTime(currentModuleNode,iterationStartEventId ){
+function getScenarioStartTime(currentModuleNode,iterationStartEventId){
   var ele = findByAttributeValue(currentModuleNode, 'eventId',iterationStartEventId).getElementsByTagName('ActualResult');
   // console.log(((ele)[0].getElementsByTagName('ActualResult')[0].childNodes[0]).nodeValue);
   return (ele[0].childNodes[0].nodeValue);
