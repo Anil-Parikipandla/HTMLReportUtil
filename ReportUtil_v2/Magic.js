@@ -278,7 +278,7 @@ function getTimeDifference(InputStartTime, InputEndTime){
   //
   var StartDate = new Date(d1[2],d1[0],d1[1],d1[3],d1[4],d1[5]);
   var EndDate = new Date(d2[2],d2[0],d2[1],d2[3],d2[4],d2[5]);
-  var diffInMillis = StartDate.getTime() - EndDate.getTime();
+  var diffInMillis =  EndDate.getTime() - StartDate.getTime();
   var diffInHours = Math.floor(diffInMillis/1000/60/60);
   var diffInMinutes = ('0' + Math.floor((diffInMillis/1000/60)%60) ).substr(-2);
   var diffInSeconds = ('0' + Math.floor((diffInMillis/1000)%60) ).substr(-2);
@@ -300,10 +300,10 @@ function generateScenariosList(moduleNode) {
     for (i = 0; i < allScenarios.length; i++) {
         strScenId = allScenarios[i].getAttribute("TCID");
         strScenIteration = "ITERATION " + allScenarios[i].getElementsByTagName('Iteration')[0].childNodes[0].nodeValue;
-        var ScenarioDuration;
+        //ScenarioDuration;
         var ele = allScenarios[i].getElementsByTagName('ActualResult');
         var eleArr = (ele[0].childNodes[0].nodeValue).split("-");
-        InputStartTime = eleArr[1];
+        InputStartTime = eleArr[1].trim();
       //   var InputStartTime = (ele[0].childNodes[0].nodeValue).substring(12);
       //  console.log('##:'+InputStartTime);
 
@@ -321,12 +321,12 @@ function generateScenariosList(moduleNode) {
         } else {
           var eleEnd = allScenarios[i+1].getElementsByTagName('ActualResult');
           var eleEndArr = (eleEnd[0].childNodes[0].nodeValue).split("-");
-          InputEndTime = eleEndArr[1];
+          InputEndTime = eleEndArr[1].trim();
       //    console.log("@#: "+InputEndTime);
         }
 
-        ScenarioDuration = getTimeDifference(InputStartTime, InputEndTime);
-        console.log(ScenarioDuration + strScenIteration);
+        strScenDuration = getTimeDifference(InputStartTime, InputEndTime);
+        console.log(strScenDuration +'for '+ strScenIteration);
 
 
         //strScenDesc=allScenarios[i].getElementsByTagName('ConsoleOutput')[0].childNodes[0].nodeValue;
@@ -346,7 +346,7 @@ function generateScenariosList(moduleNode) {
 
         strPolicyNumber = getPolicyFormNumber(allScenarios[i], 'caption', 'Generated Policy Number ');
         //	strPolicyNumber=findByAttributeValue(allScenarios[i],'caption','Generated Policy Number ').getElementsByTagName('ActualResult')[0].childNodes[0].nodeValue;
-        strScenDuration = 'SampleDuration';
+        //strScenDuration = 'SampleDuration';
         strScenStatus = allScenarios[i].getAttribute("Status");
         strScenIdInQuotes = '"' + strScenId + '"';
         if (strScenStatus.toLowerCase() == "fail") {
