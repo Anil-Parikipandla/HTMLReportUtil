@@ -4,8 +4,10 @@ var scenNode = "";
 var strAppName = "";
 var strModuleName = "";
 var strScenID = "";
+var scenMap = new Map();
 var strScenCount = "";
-var strReload = "";
+var strModReload = "";
+var strReload = [];
 var ScenariopassedCount = 0;
 var ScenariofailedCount = 0;
 var ScenarioUnexecutedCount = 0;
@@ -102,42 +104,11 @@ function hideAllDivs() {
     return;
 }
 
-// function generateModuleList() {
-//     var allModules = pubXMLDoc.getElementsByTagName('Reports');
-//
-//     strModuleList = "";
-//     strModuleList += "<TABLE CLASS=Summary WIDTH=100%><TR CLASS=header><TH COLSPAN=100% ALIGN=CENTER>";
-//     strModuleList += "<B> " + strAppName + " PROJECT - MODULE LEVEL REPORT</B></TH></TR>";
-//     strModuleList += "<TR ALIGN=CENTER CLASS=subheader><TD WIDTH=5%><B>S.NO.</B></TD>";
-//     strModuleList += "<TD WIDTH=30%><B>MODULE ID</B></TD>";
-//     strModuleList += "<TD WIDTH=30%><B>MODULE NAME</B></TD>";
-//
-//     strModuleList += "<TD WIDTH=15%><B>TOTAL SCENARIOS</B></TD>";
-//     strModuleList += "<TD WIDTH=15%><B>STATUS</B></TD>	</TR>";
-//
-//
-//     strModID = pubXMLDoc.getElementsByTagName('Reporter')[0].getAttribute('name');
-//     strModStatus = pubXMLDoc.getElementsByTagName('Reporter')[0].getAttribute('status');
-//     strModName = pubXMLDoc.getElementsByTagName('Reporter')[0].getAttribute('name');
-//     strScenCount = 19;
-//     //#############################################################################################################################
-//     //strScenCount=pubXMLDoc.getElementsByTagName('Iterations')[0].childNodes[0].nodeValue;
-//     strModNameInQuotes = '"' + strModID + '"';
-//     if (strModStatus.toLowerCase() == "failed") {
-//         strBgColor = "FFCECE";
-//     } else {
-//         strBgColor = "CEFFCE";
-//     }
-//     strModuleList += "<TR ALIGN=CENTER>	<TD>" + 1 + "</TD><TD><A HREF='#' onclick='generateModuleReport(" + strModNameInQuotes + ")" + "'> " + strModID + "</A></TD>";
-//     strModuleList += "<TD>" + strModName + "</TD><TD>" + strScenCount + "</TD><TD BGCOLOR=" + strBgColor + ">" + strModStatus + "</TD></TR>";
-//     strModuleList += "</TABLE>";
-//     document.getElementById("moduleList").innerHTML = strModuleList;
-//     toggleMe("moduleList");
-// }
-//-------------------------------------------------------------
 function generateModuleList(){
+if(strModReload  != ""){
+  console.log("No Reload at Module List");
+} else {
   var allModules=pubXMLDoc.getElementsByTagName('Reporter');
-
   strModuleList="";
   strModuleList+="<TABLE CLASS=Summary WIDTH=100%><TR CLASS=header><TH COLSPAN=100% ALIGN=CENTER>";
   strModuleList+="<B> "+ strAppName + " PROJECT - MODULE LEVEL REPORT</B></TH></TR>";
@@ -156,9 +127,9 @@ function generateModuleList(){
     strScenCount = parseInt(allModules[i].getElementsByTagName('Iterations')[0].childNodes[0].nodeValue);
     strModNameInQuotes='"'+strModID+'"';
     if(strModStatus.toLowerCase()=="failed"){
-    strBgColor="FFCECE";
+    strBgColor="EC7063";
     }else{
-    strBgColor="CEFFCE";
+    strBgColor="58D68D";
     }
     strModuleList+="<TR ALIGN=CENTER>	<TD>" + (i+1) + "</TD><TD><A HREF='#' onclick='generateModuleReport("+ strModNameInQuotes +")"+ "'> "+ strModID + "</A></TD>";
     strModuleList+="<TD>" + strModName + "</TD><TD>" + strScenCount + "</TD><TD BGCOLOR="+strBgColor+">" + strModStatus + "</TD></TR>";
@@ -179,8 +150,9 @@ function generateModuleList(){
     newNode.setAttributeNode(noOfScenarios);
     parentTag.appendChild(newNode);
     console.log(strModName + ' module Node appended');
-
   }
+    strModReload = "Modules created!";
+}
   strModuleList+="</TABLE>";
   document.getElementById("moduleList").innerHTML=strModuleList;
   toggleMe("moduleList");
@@ -217,25 +189,33 @@ function getChildNodeValue(parent, child) {
 // 	return passedIterationsobj.length;
 // }
 
-function getScenarioPassCount() {
-    var Scenarios = pubXMLDoc.getElementsByTagName("Scenario");
-    for (i = 0; i < Scenarios.length; i++) {
-        var NoOfComments = findByAttributeValue(Scenarios[i], 'result', 'COMMENT');
-        if ((Scenarios[i].getAttribute('Status')).toLowerCase() == 'pass') {
-            ScenariopassedCount = ScenariopassedCount + 1;
-        } else if ((Scenarios[i].getAttribute('Status')).toLowerCase() == 'fail') {
-            ScenariofailedCount = ScenariofailedCount + 1;
-        } else if ((NoOfComments.length) < 2) {
-            ScenarioUnexecutedCount = ScenarioUnexecutedCount + 1;
+function getScenarioPassCount(modName) {
+  var ModNode = getModuleWithName(modName);
+  var Scenarios = ModNode.getElementsByTagName("Scenario");
+  for (i = 0; i < Scenarios.length; i++) {
+      // var NoOfComments = findByAttributeValue(Scenarios[i], 'result', 'COMMENT');
+    var NoOfComments = [];
+    var All = Scenarios[i].getElementsByTagName('ReportItem');
+    for (var a = 0; a < All.length; a++) {
+        if (All[a].getAttribute('result') == 'COMMENT') {
+            NoOfComments.push(All[a]);
         }
     }
+    if ((Scenarios[i].getAttribute('Status')).toLowerCase() == 'pass') {
+        ScenariopassedCount = ScenariopassedCount + 1;
+    } else if ((Scenarios[i].getAttribute('Status')).toLowerCase() == 'fail') {
+        ScenariofailedCount = ScenariofailedCount + 1;
+    } else if ((NoOfComments.length) < 3) {
+        ScenarioUnexecutedCount = ScenarioUnexecutedCount + 1;
+    }
+  }
 
 }
 
-function generateModuleSummary(moduleNode) {
+function generateModuleSummary(modName) {
     strModuleName = pubXMLDoc.getElementsByTagName('Reporter')[0].getAttribute('name');
     strBrowser = (findByAttributeValue(pubXMLDoc, 'result', 'ITERATION 1')).getElementsByTagName('ExpectedResult')[0].childNodes[0].nodeValue;
-    getScenarioPassCount();
+    getScenarioPassCount(modName);
     // console.log('ScenariopassedCount:' + ScenariopassedCount);
     document.getElementById("modSumHeader").innerHTML = strModuleName + " MODULE - EXECUTION SUMMARY ";
     document.getElementById("buildID").innerHTML = 'NA';
@@ -246,7 +226,8 @@ function generateModuleSummary(moduleNode) {
     document.getElementById("autTool").innerHTML = 'Test Automation Center';
     document.getElementById("modExecStartTime").innerHTML = pubXMLDoc.getElementsByTagName("StartTime")[0].childNodes[0].nodeValue;
     document.getElementById("modExecEndTime").innerHTML = pubXMLDoc.getElementsByTagName("EndTime")[0].childNodes[0].nodeValue;
-    document.getElementById("totalScen").innerHTML = pubXMLDoc.getElementsByTagName('Iterations')[0].childNodes[0].nodeValue;
+    document.getElementById("totalScen").innerHTML = getModuleWithName(modName).getAttribute('NoOfScenarios');
+    // document.getElementById("totalScen").innerHTML = Mod_Node.getElementsByTagName('Iterations')[0].childNodes[0].nodeValue;
     document.getElementById("passedScen").innerHTML = ScenariopassedCount;
     document.getElementById("failedScen").innerHTML = ScenariofailedCount;
     document.getElementById("IncompleteScen").innerHTML = ScenarioUnexecutedCount;
@@ -260,8 +241,6 @@ function convertTwelveToTewntyFour(InputTime){
   var hoursInInteger = parseInt(timeObjects[0]);
   if((StartDateObjects[2] === "AM") && (hoursInInteger === 12)){
     hoursInInteger = 00;
-  } else if((StartDateObjects[2] === "PM") && (hoursInInteger === 12 )){
-    hoursInInteger = 01;
   } else if ((StartDateObjects[2] === "PM") && (hoursInInteger < 12 )){
     hoursInInteger = hoursInInteger+12;
   }
@@ -278,7 +257,7 @@ function getTimeDifference(InputStartTime, InputEndTime){
   //
   var StartDate = new Date(d1[2],d1[0],d1[1],d1[3],d1[4],d1[5]);
   var EndDate = new Date(d2[2],d2[0],d2[1],d2[3],d2[4],d2[5]);
-  var diffInMillis =  EndDate.getTime() - StartDate.getTime();
+  var diffInMillis = (EndDate.getTime() > StartDate.getTime())? (EndDate.getTime() - StartDate.getTime()): (StartDate.getTime() - EndDate.getTime());
   var diffInHours = Math.floor(diffInMillis/1000/60/60);
   var diffInMinutes = ('0' + Math.floor((diffInMillis/1000/60)%60) ).substr(-2);
   var diffInSeconds = ('0' + Math.floor((diffInMillis/1000)%60) ).substr(-2);
@@ -287,7 +266,7 @@ function getTimeDifference(InputStartTime, InputEndTime){
   return DateDifference;
 }
 
-function generateScenariosList(moduleNode) {
+function generateScenariosList(moduleNode, modName) {
     strScenList = "";
     strScenList += "<TR CLASS=header><TH COLSPAN=100% ALIGN=CENTER>";
     strScenList += "<B>" + strModuleName + " MODULE - SCENARIO LEVEL REPORT </B></TH></TR>";
@@ -296,7 +275,7 @@ function generateScenariosList(moduleNode) {
     strScenList += "<TD WIDTH=15%><B>POLICY NUMBER</B></TD>";
     strScenList += "<TD WIDTH=15%><B>EXECUTION DURATION</B></TD>";
     strScenList += "<TD WIDTH=10%><B>STATUS</B></TD>";
-    var allScenarios = pubXMLDoc.getElementsByTagName("Scenario");
+    var allScenarios = moduleNode.getElementsByTagName("Scenario");
     for (i = 0; i < allScenarios.length; i++) {
         strScenId = allScenarios[i].getAttribute("TCID");
         strScenIteration = "ITERATION " + allScenarios[i].getElementsByTagName('Iteration')[0].childNodes[0].nodeValue;
@@ -350,14 +329,21 @@ function generateScenariosList(moduleNode) {
         strScenStatus = allScenarios[i].getAttribute("Status");
         strScenIdInQuotes = '"' + strScenId + '"';
         if (strScenStatus.toLowerCase() == "fail") {
-            strBgColor = "FFCECE";
-        } else {
-            strBgColor = "CEFFCE";
+            strBgColor = "EC7063";
+        } else if(strScenStatus.toLowerCase() == "pass"){
+            strBgColor = "58D68D";
+        } else{
+            strBgColor = "D2B4DE";
         }
-        strScenList += "<TR><TD><A HREF='#' onclick='generateScenariosReport(" + strScenIdInQuotes + ")" + "'> " + strScenId + "</A></TD>";
+        strScenList += "<TR><TD><A HREF='#' onclick='generateScenariosReport(" + strScenIdInQuotes +","+'"'+modName+'"'+ ")" + "'> " + strScenId + "</A></TD>";
+        // strScenList += "<TR><TD><A HREF='#' onclick='generateScenariosReport(" + strScenIdInQuotes + ")" + "'> " + strScenId + "</A></TD>";
         //strScenList+="<TD>"+strScenIteration+"</TD><TD>" + strScenDuration + "</TD><TD BGCOLOR="+strBgColor+">" + strScenStatus + "</TD></TR>";
         strScenList += "<TD>" + strScenIteration + "</TD><TD>" + strPolicyNumber + "</TD><TD>" + strScenDuration + "</TD><TD BGCOLOR=" + strBgColor + ">" + strScenStatus + "</TD></TR>";
     }
+    console.log("This is to be printed:"+moduleNode);
+    console.log("This is to be Stored:"+strScenList);
+
+    scenMap.set(modName,strScenList);
 
     document.getElementById("scenList").innerHTML = strScenList;
     toggleMe("moduleSum");
@@ -414,6 +400,8 @@ function getIteration(modName) {
     var iterationStartEventId;
     var iterationEndEventId;
     var currentModuleNode = ((findByAttributeValueInModules(pubXMLDoc, 'name', modName)).parentNode).parentNode;
+
+
     for (NoOfIterations = 1; NoOfIterations <= strScenCount; NoOfIterations++) {
         //console.log('IterationCount: '+strScenCount);
 
@@ -471,53 +459,39 @@ function createNode(currentModuleNode,modName, NoOfIterations, iterationStartEve
         newNode.appendChild(ele);
         // console.log('node added');
     }
-    strReload = 'Nodes already created!';
+    // strReload = 'Nodes already created!';
     console.log('node appended');
     return newNode;
 }
 
-
-// function createNode(NoOfIterations, iterationStartEventId, iterationEndEventId) {
-//     var iterationStatus = getIterationStatus(iterationStartEventId, iterationEndEventId);
-//     var parentTag = pubXMLDoc.getElementsByTagName('TestScript')[0];
-//     var newNode = pubXMLDoc.createElement('Scenario');
-//     //newNode.id = "Anil";
-//     var textNode = pubXMLDoc.createTextNode("This is a custom Node");
-//     newNode.appendChild(textNode);
-//     var statusAttribute = (pubXMLDoc.createAttribute('Status'));
-//     var iterationName = getTCID(iterationStartEventId, iterationEndEventId);
-//     var iterationNameAttribute = (pubXMLDoc.createAttribute('TCID'));
-//     // var iterationName = iterationNameobj[0].childNodes[0].nodeValue;
-//
-//     statusAttribute.value = iterationStatus;
-//     iterationNameAttribute.value = iterationName;
-//     newNode.innerHTML = "NodeIteration" + NoOfIterations;
-//     newNode.setAttributeNode(statusAttribute);
-//     newNode.setAttributeNode(iterationNameAttribute);
-//     parentTag.appendChild(newNode);
-//     console.log('node appended to parentTag');
-//     // console.log('Iteration Status: '+iterationStatus);
-//
-//     for (i = iterationStartEventId; i <= iterationEndEventId; i++) {
-//         var ele = findByAttributeValue(pubXMLDoc, 'eventId', i);
-//         newNode.appendChild(ele);
-//         // console.log('node added');
-//     }
-//     strReload = 'Nodes already created!';
-//     console.log('node appended');
-//     return newNode;
-// }
-
 function getIterationStatus(currentModuleNode, start, end) {
     var IterationStatus = 'PASS';
+    var NoOfComments = [];
     for (i = start; i <= end; i++) {
         var ResultItem = findByAttributeValue(currentModuleNode, 'eventId', i);
+        if (ResultItem.getAttribute('result') == 'COMMENT') {
+            NoOfComments.push(ResultItem);}
         if (((ResultItem.getAttribute('result')) === 'EXCEPTION')||(ResultItem.getAttribute('result')) === 'FAILED') {
             IterationStatus = 'FAIL';
         }
     }
+    if((NoOfComments.length) < 3){
+       IterationStatus = 'SKIPPED';
+   }
     return IterationStatus;
 }
+
+// function getIterationStatus(currentModuleNode, start, end) {
+//     var IterationStatus = 'PASS';
+//     for (i = start; i <= end; i++) {
+//         var ResultItem = findByAttributeValue(currentModuleNode, 'eventId', i);
+//         if (((ResultItem.getAttribute('result')) === 'EXCEPTION')||(ResultItem.getAttribute('result')) === 'FAILED') {
+//             IterationStatus = 'FAIL';
+//         }
+//     }
+//     return IterationStatus;
+// }
+
 
 function getTCID(currentModuleNode, start, end) {
     var TCIDe = '';
@@ -531,19 +505,36 @@ function getTCID(currentModuleNode, start, end) {
     }
 }
 
-
-//#############################################################################################################
-
 function generateModuleReport(modName) {
 		ScenariopassedCount = 0;
 		ScenariofailedCount = 0;
 		ScenarioUnexecutedCount = 0;
-    var moduleNode = getIteration(modName);
-    generateScenariosList(moduleNode);
-    generateModuleSummary(moduleNode);
+    if(!strReload.includes(modName)){
+      strReload.push(modName);
+      var moduleNode = getIteration(modName);
+      generateScenariosList(moduleNode, modName);
+    } else {
+      strScenList = scenMap.get(modName);
+      console.log("Nodes already created!");
+      document.getElementById("scenList").innerHTML = strScenList;
+      toggleMe("moduleSum");
+    }
+      console.log("This is the Reload Array: "+strReload);
+
+
+    generateModuleSummary(modName);
 
 }
 
+// function generateModuleReport(modName) {
+// 		ScenariopassedCount = 0;
+// 		ScenariofailedCount = 0;
+// 		ScenarioUnexecutedCount = 0;
+//     var moduleNode = getIteration(modName);
+//     generateScenariosList(moduleNode);
+//     generateModuleSummary(moduleNode);
+//
+// }
 
 // function generateModuleReport(modName) {
 // 		ScenariopassedCount = 0;
@@ -560,8 +551,11 @@ function generateModuleReport(modName) {
 // }
 
 
-function generateScenariosReport(scenID) {
-    var allScenarios = pubXMLDoc.getElementsByTagName("Scenario");
+
+
+function generateScenariosReport(scenID, modName) {
+    var ModNode = getModuleWithName(modName);
+    var allScenarios = ModNode.getElementsByTagName("Scenario");
     for (i = 0; i < allScenarios.length; i++) {
         var NodeId = allScenarios[i].getAttribute("TCID");
         if (NodeId == scenID) {
@@ -569,16 +563,16 @@ function generateScenariosReport(scenID) {
             break;
         }
     }
-    GenerateScenarioSummary(scenNode);
+    GenerateScenarioSummary(scenNode, modName);
     generateStepList(scenNode);
 }
 
-function GenerateScenarioSummary(scenNode) {
+function GenerateScenarioSummary(scenNode, modName) {
     strScenID = scenNode.getAttribute("TCID");
     document.getElementById("scenSumHeader").innerHTML = strScenID + " SCENARIO - EXECUTION SUMMARY";
     //document.getElementById("scenModName").innerHTML=strModuleName;
-    strModNameInQuotes = '"' + strModuleName + '"';
-    document.getElementById("scenModName").innerHTML = "<A HREF='#' onclick='generateModuleReport(" + strModNameInQuotes + ")" + "'> " + strModuleName + "</A>"
+    strModule_name = '"' + modName + '"';
+    document.getElementById("scenModName").innerHTML = "<A HREF='#' onclick='generateModuleReport(" + strModule_name + ")" + "'> " + modName + "</A>"
     document.getElementById("scenID").innerHTML = strScenID;
     document.getElementById("scenDesc").innerHTML = 'SampleDescription';
 		strBrowser = (findByAttributeValue(pubXMLDoc, 'result', 'ITERATION 1')).getElementsByTagName('ExpectedResult')[0].childNodes[0].nodeValue;
@@ -631,10 +625,10 @@ function generateStepList(scenNode) {
 
         if (strStepStatus.toLowerCase() == "fail") {
             //strBgColor="EF2C2C";
-            strBgColor = "FFCECE";
+            strBgColor = "EC7063";
         } else if (strStepStatus.toLowerCase() == "pass") {
             //strBgColor="4CAF50";
-            strBgColor = "CEFFCE";
+            strBgColor = "58D68D";
         } else if (strStepStatus.toLowerCase() == "warning") {
             strBgColor = "FFFF7F";
         }
