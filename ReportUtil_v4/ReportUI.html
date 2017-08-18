@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+
+<HEAD>
+	<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+	<meta content="utf-8" http-equiv="encoding">
+	<TITLE>MBG - Automation Test Execution Report</TITLE>
+</HEAD>
+
+
+<style type='text/css'>
+	input.button {
+		font-size: .8em;
+		font-weight: bold;
+		font-family: Verdana, Arial, Helvetica, sans-serif;
+		border: solid 1;
+	}
+
+	table.summary,
+	th,
+	td {
+		border: 1px solid black;
+	}
+
+	table.image,
+	th.image,
+	td.image {
+		border: 0px
+	}
+
+	tr {
+		font-family: VERDANA;
+		font-size: 13px;
+		padding-top: 10px;
+		padding-bottom: 10px;
+	}
+
+	table {
+		border-collapse: collapse;
+		border: 0px solid black;
+	}
+
+	th {
+		border: 0px solid black;
+		padding-top: 20px;
+		padding-bottom: 20px;
+	}
+
+	td {
+		border: 1px solid #fff;
+		padding-top: 5px;
+		padding-bottom: 5px;
+		max-width: 45ch;
+		overflow: auto;
+	}
+
+	tr:nth-child(even) {
+		background-color: #e0e0e0
+	}
+
+
+	tr.header {
+		background-color: #464547;
+		color: white
+	}
+
+	tr.subheader {
+		background-color: #39C2D7;
+		padding-top: 20px;
+		padding-bottom: 20px;
+	}
+
+	td.subheader {
+		background-color: #39C2D7;
+		color: black;
+		font-weight: bold;
+		border-right: white;
+    	border-right-width: 1px;
+	}
+
+	.upload-btn-wrapper {
+		position: relative;
+		overflow: hidden;
+		display: inline-block;
+	}
+
+	.btn {
+		border: 0px solid gray;
+		color: white;
+		background-color: #39C2D7;
+		padding: 15px 30px;
+		border-radius: 80px;
+		font-size: 20px;
+		font-weight: normal;
+		font-family: calibri;
+	}
+
+	.upload-btn-wrapper input[type=file] {
+		font-size: 100px;
+		position: absolute;
+		left: 0;
+		top: 0;
+		opacity: 0;
+	}
+</style>
+<!--cfcfff
+f8f8ff
+BGCOLOR='#fbfbff'
+color:#DF7401
+color:#B45F04
+body{background: linear-gradient(to right, rgba(0,0,255,0), rgba(240,240,255,1));}
+<body BGCOLOR=#F4F6Ff >-->
+
+<!-- <body BGCOLOR=#ffffff background="paper.jpg" style="height: 100%;background-position: initial;background-repeat: no-repeat;background-size: cover;"> -->
+	<body BGCOLOR=#ffffff >
+	<script src="Magic.js"></script>
+
+	<table class=image width=100%>
+		<tr class=image>
+			<td class=image><img src=.\logos\Header.png></td>
+			<td class=image align=CENTER>
+				<!-- <label for="xmlFileinput">Choose a valid report XML file:</label> -->
+
+		</tr>
+	</table>
+	<!-- <h2 align=center id='projectHeaderHome'>
+	<font COLOR=#39C2D7 style="font-size: -webkit-xxx-large; font-family: century gothic"> MBG - Automation Test Execution Report</font>
+	</h2> -->
+	<h2 id='projectHeader' align=center>
+		<font face=Calibri color=#39C2D7 style='font-family: century gothic'> MBG - Automation Test Execution Report</font>
+	</h2>
+
+	<div align='center' style="padding-top: 10px;padding-bottom: 10px;">
+		<div class="upload-btn-wrapper">
+			<button class="btn">Upload a valid TAC Report xml</button>
+			<input type="file" id="xmlFileinput" onchange="handleFiles(this.files)" size=80> </td>
+		</div>
+	</div>
+
+	<div align='center'>
+		<img src="caveman.gif">
+	</div>
+
+	<table width=100% id='projectSummary' style='display: none'>
+			<tr class=header>
+				<!--<TH COLSPAN=100% ALIGN=CENTER><FONT FACE=VERDANA SIZE=2><B id='testsum'>PROJECT EXECUTION SUMMARY</FONT></B></TH>-->
+				<TH id='testsum' COLSPAN=100% ALIGN=CENTER>PROJECT EXECUTION SUMMARY</TH>
+			</tr>
+			<tr ALIGN=CENTER class=subheader>
+				<td width=15% style='padding-top: 10px; padding-bottom: 10px;'>
+					<B>Application Name</B>
+				</td>
+				<td width=15%>
+					<B>Application Type</B>
+				</td>
+				<td width=15%>
+					<B>Test Environment</B>
+				</td>
+				<td width=15%>
+					<B>Test Suite Type</B>
+				</td>
+				<td width=15%>
+					<B>Execution Start Time</B>
+				</td>
+				<td width=15%>
+					<B>Execution End Time</B>
+				</td>
+			</tr>
+			<tr ALIGN=CENTER>
+				<td width=15%>
+					<A id='appName' HREF='#' onclick='generateModuleList()'></A>
+				</td>
+				<td id='appType' width=15%> </td>
+				<td id='testEnv' width=15%> </td>
+				<td id='testType' width=15%> </td>
+				<td id='execDate' width=15%> </td>
+				<td id='execTime' width=15%> </td>
+			</tr>
+		</table>
+	</BR>
+
+	<div id='moduleList' style='display:none'>
+	</div>
+
+	<div id='moduleSum' style='display:none'>
+		<table width=100% cellpadding=5px border=1px>
+			<tr class=header>
+				<TH COLSPAN=100% ALIGN=CENTER>
+					<B id='modSumHeader'>MODULE EXECUTION SUMMARY - Module-1 </B>
+				</TH>
+			</tr>
+			<!-- <tr> -->
+			<!-- <td class=subheader width=13%>Build id:</td> -->
+			<!-- <td id='buildID' width=12%></td> -->
+			<!-- <td class=subheader width=13%>OS:</td> -->
+			<!-- <td id='os' width=12%></td> -->
+			<!-- <td class=subheader width=13%>Host Name:</td> -->
+			<!-- <td id='machineName' width=12%></td> -->
+			<!-- <td class=subheader width=13%>Browser:</td> -->
+			<!-- <td id='browser' width=12%></td> -->
+			<!-- </tr> -->
+			<tr>
+				<td class=subheader width=10%>Browser:</td>
+				<td id='browser' width=10%></td>
+				<td class=subheader width=10%>Total Scenarios:</td>
+				<td width=10%>
+					<FONT id='totalScen' FACE=VERDANA SIZE=2>
+				</td>
+
+			</tr>
+			<tr>
+				<!-- <td class=subheader width=13%>Executed by:</td> -->
+				<!-- <td id='execBy' width=12%></td> -->
+				<td class=subheader width=10%>Automation Tool:</td>
+				<td id='autTool' width=15%></td>
+				<td class=subheader width=10%>Passed Scenarios:</td>
+				<td width=12%>
+					<FONT id='passedScen' FACE=VERDANA COLOR=Green SIZE=2>
+				</td>
+
+
+			</tr>
+			<tr>
+				<td class=subheader width=13%>Execution Start time:</td>
+				<td id='modExecStartTime' width=15%></td>
+
+
+				<td class=subheader width=13%>Failed Scenarios:</td>
+				<td width=15%>
+					<FONT id='failedScen' FACE=VERDANA COLOR=Red SIZE=2>
+				</td>
+
+			</tr>
+
+			<tr>
+				<td class=subheader width=13%>Execution End time:</td>
+				<td id='modExecEndTime' width=15%></td>
+				<td class=subheader width=13%>Incomplete Scenarios:</td>
+				<td width=15%>
+					<FONT id='IncompleteScen' FACE=VERDANA SIZE=2>
+				</td>
+			</tr>
+		</table>
+		</BR>
+		<table cellpadding=5px id='scenList' width=100% border=1px>
+		</table>
+	</div>
+
+	<div id='scenSum' style='display:none'>
+		<table cellpadding=5px width=100% border=1px>
+			<tr class=header>
+				<TH COLSPAN=100% ALIGN=CENTER>
+					<B id='scenSumHeader'></B>
+				</TH>
+			</tr>
+			<tr>
+				<td class=subheader width=10%>Scenario Id:</td>
+				<td id='scenID' width=15%></td>
+				<!-- <td class=subheader width=13%>Scenario Description:</td>
+				<td id='scenDesc' width=42% colspan=5></td> -->
+				<td class=subheader width=13%>Execution Start Time:</td>
+				<td id='scenExecStartTime' width=12%></td>
+			</tr>
+			<tr>
+				<!-- <td class=subheader width=13%>Browser:</td>
+				<td id='scenBrowser' width=12%></td> -->
+				<td class=subheader width=10%>Module Name:</td>
+				<td id='scenModName' width=15%></td>
+
+				<td class=subheader width=13%>Execution End Time:</td>
+				<td id='scenExecEndTime' width=12%></td>
+			</tr>
+		</table>
+		</BR>
+		<table cellpadding=5px id='stepList' width=100% border=1px>
+		</table>
+	</div>
+	<table class=image width=100%>
+		<tr width=100%>
+			<td class=image align=RIGHT valign=bottom></td>
+			<td style="word-wrap: break-word" class=image align=RIGHT>
+				<p></p>
+			</td>
+			<td class=image align=RIGHT><img src=.\logos\Footer.jpg></td>
+		</tr>
+	</table>
+</body>
+
+</html>
